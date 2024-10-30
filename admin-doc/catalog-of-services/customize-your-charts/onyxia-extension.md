@@ -1,111 +1,14 @@
 ---
-description: Unserstand how Onyxia catalogs work and potentially create your own!
+description: Onyxia has his own extension of json schema
 ---
 
-# 🔬 Catalog of services
-
-Every Onyxia instance may or may not have it's own catalog. There are four default catalogs :
-
-{% embed url="https://github.com/inseefrlab/helm-charts-interactive-services" %}
-
-This collection of charts helps users to launch many IDE with various binary stacks (python , R) with or without GPU support. Docker images are built [here](https://github.com/inseefrlab/images-datascience) and help us to give a homogeneous stack.
-
-{% embed url="https://github.com/inseefrlab/helm-charts-databases" %}
-
-This collection of charts helps users to launch many databases system. Most of them are based on [bitnami/charts](https://github.com/bitnami/charts).
-
-{% embed url="https://github.com/InseeFrLab/helm-charts-automation/" %}
-
-This collection of charts helps users to start automation tools for their datascience activity.
-
-{% embed url="https://github.com/InseeFrLab/helm-charts-datavisualization" %}
-
-This collection of charts helps users to launch tools to visualize and share data insights.
-
-You can always find the source of the catalog by clicking on the "contribute to the... " link.\
-
-
-<figure><img src="../.gitbook/assets/330910409-0e8ff947-644f-4de6-88ae-9e2b6c2a8cd2.png" alt=""><figcaption><p><a href="https://datalab.sspcloud.fr/catalog">https://datalab.sspcloud.fr/catalog</a></p></figcaption></figure>
-
-If you take [this other instance](https://onyxia-sill.lab.sspcloud.fr), it has only one catalog, [helm-charts-sill](https://github.com/etalab/helm-charts-sill).
-
-![https://sill-demo.etalab.gouv.fr/catalog](<../.gitbook/assets/image (38).png>)
-
-## Using your own catalogs (helm charts repositories)
-
-If you do not specify catalogs in your `onyxia/values.yaml,` these are the ones that are used by default: [See file](https://github.com/InseeFrLab/onyxia-api/blob/main/onyxia-api/src/main/resources/catalogs.json).
-
-To configure your onyxia instance to use your own custom helm repositories as onyxia catalogs you need to use the onyxia configuration `onyxia.api.catalogs`.  \
-Let's say we're NASA and we want to have an "_Areospace services"_ catalog on our onyxia instance. Our onyxia configuration would look a bit like this: &#x20;
-
-{% code title="onyxia/values.yaml" %}
-```yaml
-onyxia:
-  web:
-    # ...
-  api:
-    # ...
-    catalogs: [
-      {
-        type: "helm",
-        id: "aerospace",
-        # The url of the Helm chart repository
-        location: "https://myorg.github.io/helm-charts-aerospace/",
-        # Display under the search bar as selection tab:
-        # https://github.com/InseeFrLab/onyxia/assets/6702424/a7247c7d-b0be-48db-893b-20c9352fdb94
-        name: { 
-          en: "Aerospace services",
-          fr: "Services aérospatiaux"
-          # ... other languages your instance supports
-        },
-        # Optional. Defines the chart that should appear first
-        highlightedCharts: ["jupyter-artemis", "rstudio-dragonfly"],
-        # Optional. Defines the chart that should be excluded
-        excludedCharts: ["a-vendor-locking-chart"],
-        # Optional, If defined, displayed in the header of the catalog page:
-        # https://github.com/InseeFrLab/onyxia/assets/6702424/57e32f44-b889-41b2-b0c7-727c35b07650
-        # Is rendered as Markdown
-        description: { 
-          en: "A catalog of services for aerospace engineers",
-          fr: "Un catalogue de services pour les ingénieurs aérospatiaux"
-          # ...
-        },
-        # Can be "PROD" or "TEST". If test the catalogs will be accessible if you type the url in the search bar
-        # but you won't have a tab to select it.
-        status": "PROD",
-        # Optional. If true the certificate verification for `${location}/index.yaml` will be skipped.
-        skipTlsVerify: false,
-        # Optional. certificate authority file to use for the TLS verification
-        caFile: "/path/to/ca.crt",
-        # Optional: Enables you to a specific group of users.
-        # You can match any claim in the JWT token.  
-        # If the claim's value is an array, it match if one of the value is the one you specified.
-        # The match property can also be a regex.
-        restrictions: [
-          {
-            userAttribute: {
-              key: "groups",
-              matches: "nasa-engineers"
-            }
-          }
-        ]
-      },
-       # { ... } another catalog
-    ]
-```
-{% endcode %}
-
-## Customizing your helm charts for Onyxia
-
-In Onyxia we use the `values.schema.json` file to know what options should be displayed to the user at [the service configuration step](https://user-images.githubusercontent.com/6702424/177571819-f2e1b4ef-ecd1-479b-a5a1-658d87d7c7c0.png) and what default value Onyxia should inject.
-
-![https://helm.sh/docs/topics/charts/#the-chart-file-structure](<../.gitbook/assets/image (32).png>)
+# 🟨 Onyxia extension
 
 ### \[x-onyxia] overwriteDefaultWith
 
 Let's consider a sample of the `values.schema.json` of the InseeFrLab/helm-charts-interactive-services' Jupyter chart:
 
-<pre class="language-javascript" data-title="values.schema.json"><code class="lang-javascript">"git": {
+<pre class="language-json" data-title="values.schema.json"><code class="lang-json">"git": {
     "description": "Git user configuration",
     "type": "object",
     "properties": {
@@ -192,7 +95,7 @@ Note the `"git.name"`, `"git.email"` and `"git.token"`, this enables [onyxia-web
 
 If the user took the time to fill its profile information, [onyxia-web](https://github.com/InseeFrLab/onyxia-web) knows what is the Git **username**, **email** and **personal access token** of the user.
 
-![The onyxia user profile](<../.gitbook/assets/image (21).png>)
+![The onyxia user profile](<../../../.gitbook/assets/image (21).png>)
 
 [Here](https://github.com/InseeFrLab/onyxia/blob/main/web/src/core/ports/OnyxiaApi/XOnyxia.ts) is defined the structure of the context that you can use in the `overwriteDefaultWith` field:
 
@@ -399,11 +302,9 @@ You can also concatenate string values using by wrapping the XOnyxia targeted va
 ```
 {% endcode %}
 
-### \[x-onyxia] overwriteListEnumWith
-
 This is an option for customizing the options of the forms fields rendered as select.
 
-<figure><img src="../.gitbook/assets/image.png" alt="" width="375"><figcaption><p>Example of select form field in the onyxia launcher</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image.png" alt="" width="375"><figcaption><p>Example of select form field in the onyxia launcher</p></figcaption></figure>
 
 In your values shema such a field would be defined like:
 
@@ -722,144 +623,3 @@ You may want to modify the slide bar for resources
     }
 }
 </code></pre>
-
-#### How to overwrite a schema or create a new one ?
-
-You can directly create file in the values of onyxia helm charts
-
-{% code title="onyxia-values.yaml" %}
-```yaml
-onyxia:
-  web:
-    # ...
-  api:
-    # ...
-    schemas:
-      enabled: true
-      files:
-        - relativePath: ide/resources.json
-          content: |
-            {
-                "$schema": "http://json-schema.org/draft-07/schema#",
-                "title": "Resources",
-                "description": "Your service will have at least the requested resources and never more than its limits. No limit for a resource and you can consume everything left on the host machine.",
-                "type": "object",
-                "properties": {
-                    "requests": {
-                        "description": "Guaranteed resources",
-                        "type": "object",
-                        "properties": {
-                            "cpu": {
-                                "description": "The amount of cpu guaranteed",
-                                "title": "CPU",
-                                "type": "string",
-                                "default": "100m",
-                                "render": "slider",
-                                "sliderMin": 50,
-                                "sliderMax": 10000,
-                                "sliderStep": 50,
-                                "sliderUnit": "m",
-                                "sliderExtremity": "down",
-                                "sliderExtremitySemantic": "guaranteed",
-                                "sliderRangeId": "cpu"
-                            },
-                            "memory": {
-                                "description": "The amount of memory guaranteed",
-                                "title": "memory",
-                                "type": "string",
-                                "default": "2Gi",
-                                "render": "slider",
-                                "sliderMin": 1,
-                                "sliderMax": 200,
-                                "sliderStep": 1,
-                                "sliderUnit": "Gi",
-                                "sliderExtremity": "down",
-                                "sliderExtremitySemantic": "guaranteed",
-                                "sliderRangeId": "memory"
-                            }
-                        }
-                    },
-                    "limits": {
-                        "description": "max resources",
-                        "type": "object",
-                        "properties": {
-                            "cpu": {
-                                "description": "The maximum amount of cpu",
-                                "title": "CPU",
-                                "type": "string",
-                                "default": "5000m",
-                                "render": "slider",
-                                "sliderMin": 50,
-                                "sliderMax": 10000,
-                                "sliderStep": 50,
-                                "sliderUnit": "m",
-                                "sliderExtremity": "up",
-                                "sliderExtremitySemantic": "Maximum",
-                                "sliderRangeId": "cpu"
-                            },
-                            "memory": {
-                                "description": "The maximum amount of memory",
-                                "title": "Memory",
-                                "type": "string",
-                                "default": "50Gi",
-                                "render": "slider",
-                                "sliderMin": 1,
-                                "sliderMax": 200,
-                                "sliderStep": 1,
-                                "sliderUnit": "Gi",
-                                "sliderExtremity": "up",
-                                "sliderExtremitySemantic": "Maximum",
-                                "sliderRangeId": "memory"
-                            }
-                        }
-                    }
-                }
-            }
-        - relativePath: nodeSelector.json
-          content: |
-            {
-              "$schema": "http://json-schema.org/draft-07/schema#",
-              "title": "Node Selector",
-              "type": "object",
-              "properties": {
-                "disktype": {
-                  "description": "The type of disk",
-                  "type": "string",
-                  "enum": ["ssd", "hdd"]
-                },
-                "gpu": {
-                  "description": "The type of GPU",
-                  "type": "string",
-                  "enum": ["A2", "H100"]
-                }
-              },
-              "additionalProperties": false
-            }
-        - relativePath: ide/role.json
-          content: |
-            {
-              "$schema": "http://json-schema.org/draft-07/schema#",
-              "title": "Role",
-              "type": "object",
-              "properties": {
-                  "enabled": {
-                      "type": "boolean",
-                      "description": "allow your service to access your namespace ressources",
-                      "default": true
-                  },
-                  "role": {
-                      "type": "string",
-                      "description": "bind your service account to this kubernetes default role",
-                      "default": "view",
-                      "hidden": {
-                          "value": false,
-                          "path": "kubernetes/enabled"
-                      },
-                      "enum": [
-                          "view"
-                      ]
-                  }
-              }
-            }
-```
-{% endcode %}
