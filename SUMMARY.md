@@ -24,6 +24,7 @@
   * [⬆️ v5 -> v6](admin-doc/migration-guides/v5-greater-than-v6.md)
   * [⬆️ v4 -> v5](admin-doc/migration-guides/v4-greater-than-v5.md)
   * [⬆️ Migrating to the new helm repo](admin-doc/migration-guides/migrating-to-the-new-helm-repo.md)
+  * [⬆️ v9 -> v10](admin-doc/migration-guides/v9-greater-than-v10.md)
 
 ## Contributors doc
 
