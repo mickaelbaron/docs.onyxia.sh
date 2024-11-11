@@ -1,6 +1,6 @@
 # ⬆️ v8 -> v9
 
-{% hint style="warning" %}
+{% hint style="danger" %}
 tl;dr: **Breaking change**, `defaultConfiguration` in region configuration is not allowed anymore and has been replaced by JSONSchemas override using the new `api.schemas` key from v9 helm chart.
 {% endhint %}
 
