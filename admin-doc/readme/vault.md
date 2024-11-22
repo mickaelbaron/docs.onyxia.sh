@@ -16,10 +16,10 @@ layout:
 # 🔓 Vault
 
 {% hint style="info" %}
-Vault is also used by Onyxia as the persistance layer for all saved configuration. If you don't have a vault all user settings are stored in the local storage.
+Vault is also used by Onyxia as the persistance layer for all saved configuration. If Vault is not configured, all user settings will be stored in the browser's local storage.
 {% endhint %}
 
-Onyxia-web use vault as a storage for two kinds of secrets :\
+Onyxia-web use vault as a storage for two kinds of secrets:\
 1\. secrets or information generate by Onyxia to store differents values (S3 sources configuration)\
 2\. user secrets\
 
@@ -27,7 +27,7 @@ Onyxia-web use vault as a storage for two kinds of secrets :\
 **Onyxia use the KV version 2 secret engine.**\
 **Vault must be configured with JWT or OIDC authentification methods.**
 
-As vault needs to be initialized with a master key, it can't be directly configured with all parameters such as oidc or access policies and roles. So first step we create a vault with dev mode (do not use this in production and do your initialization with any of the recommanded configuration : shamir, gcp, another vault)
+As Vault needs to be initialized with a master key, it can't be directly configured with all parameters such as oidc or access policies and roles. So first step we create a vault with dev mode (do not use this in production and do your initialization with any of the recommanded configuration:     , gcp, another vault).
 
 ```bash
 helm repo add hashicorp https://helm.releases.hashicorp.com
@@ -56,15 +56,27 @@ helm install vault hashicorp/vault -f vault-values.yaml
 
 ### Setting up JWT authentification for Vault
 
-Create a client called "vault"
+From Keycloak, create a client called "vault" (realm "datalab" as usually in this documentation)
 
 1. _Root URL_: **https://vault.lab.my-domain.net/**
-2. _Valid redirect URIs_: **https://vault.lab.my-domain.net/\***
+2. _Valid redirect URIs_: **https://vault.lab.my-domain.net/\*** and **https://datalab.my-domain.net/\***
 3. _Web origins_: **\***
 
-We will now configure vault to enable `JWT` support, set policies for users permissions and initialize the secret engine.
+The expected value for the audience (aud) field of the JWT token by Vault is `vault`. You need to configure this in Keycloak.
 
-You will need the vault `CLI`. You can either download it [here](https://www.vaultproject.io/downloads) and configure `VAULT_ADDR=https://vault.lab.my-domain.net` and `VAULT_TOKEN=root` or exec into the vault pod `kubectl exec -it vault-0 -n vault -- /bin/sh` which will have vault `CLI` installed and pre-configured.
+1. Create a new Client scope: `vault`
+2. Add Mapper by configuration
+3. Choose Audience
+   * Name: Audience for Vault
+   * Included Client Audience: `vault`
+   * Save
+
+* Choose Clients: `vault`
+  * Add Client Scope: `vault`
+
+We will now configure Vault to enable `JWT` support, set policies for users permissions and initialize the secret engine.
+
+You will need the Vault `CLI`. You can either download it [here](https://www.vaultproject.io/downloads) and configure `VAULT_ADDR=https://vault.lab.my-domain.net` and `VAULT_TOKEN=root` or exec into the vault pod `kubectl exec -it vault-0 -n vault -- /bin/sh` which will have vault `CLI` installed and pre-configured.
 
 First, we start by creating a `JWT` endpoint in Vault, and writing information about Keycloak to the configuration. We use the same realm as usually in this documentation.&#x20;
 
@@ -78,7 +90,7 @@ vault write auth/jwt/config \
     default_role="onyxia-user"
 ```
 
-Onyxia use only one single role for every user in Vault. This is in this tutorial `onyxia-user`\`. **To provide an authorization mechanism we use a policy that will depend on claims inside the JWT token.**
+Onyxia uses only one single role for every user in Vault. This is in this tutorial `onyxia-user`\`. **To provide an authorization mechanism a policy is used that will depend on claims inside the JWT token.**
 
 First you need to get the identifier (mount accessor) for the JWT authentification just created. You can use :&#x20;
 
@@ -86,11 +98,11 @@ First you need to get the identifier (mount accessor) for the JWT authentificati
 vault auth list -format=json | jq -r '.["jwt/"].accessor'
 ```
 
-which should provide you something like `auth_jwt_xyz`  You will need it to **write a proper policy**.
+which should provide you something like `auth_jwt_xyz`. You will need it to **write a proper policy** by replacing the `auth_jwt_xyz` content with your own value.
 
 ### Setting up a policy
 
-Create locally a file named `onyxia-policy.hcl`
+Create locally a file named `onyxia-policy.hcl`.
 
 You can notice that this policy is written for a KV version 2 secret engine mounted to the `onyxia-kv` path. The following policy is only working for personnal access because the entity name will be the preferred username in the JWT token.
 
@@ -274,15 +286,19 @@ vault write auth/jwt/role/onyxia-user \
     token_policies="onyxia-policy"
 ```
 
-And finally we can enable the secret engine.
+We need to enable the secret engine.
 
 ```
 vault secrets enable -path=onyxia-kv kv-v2
 ```
 
+Then, you need to allow the URL https://datalab.my-domain.net in Vault's CORS settings.
 
+```
+vault write sys/config/cors allowed_origins="https://onyxia.lias-lab.fr" enabled=true
+```
 
-You can finally modify your onyxia config file ( in the helm values) :tada:
+You can finally modify your onyxia config file (in the helm values) :tada:
 
 {% code title="onyxia/values.yaml" %}
 ```yaml
