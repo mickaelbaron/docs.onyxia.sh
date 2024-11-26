@@ -388,12 +388,14 @@ You can provide this schema to allow your users to choose between SSD or HDD dis
     "disktype": {
       "description": "The type of disk",
       "type": "string",
-      "enum": ["ssd", "hdd"]
+      "enum": ["ssd", "hdd"],
+      "default": "ssd"
     },
     "gpu": {
       "description": "The type of GPU",
       "type": "string",
-      "enum": ["A2", "H100"]
+      "enum": ["A2", "H100"],
+      "default": "A2"
     }
   },
   "additionalProperties": false //any other label is disallowed

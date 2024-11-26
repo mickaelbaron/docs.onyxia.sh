@@ -24,28 +24,32 @@ The JSON Schema draft Onyxia follows is largely based on [Draft 7](https://json-
 
 In Onyxia’s JSON Schema implementation, string elements include various `render` types to adjust the input style based on each field’s function, creating a more intuitive user experience. Here are the primary `render` types supported for string fields:
 
-1.  **Dropdown Selection (`render: "list"`)**: Displays a dropdown menu for selecting from a set of predefined values, which is useful for fields like software versions or configurations.\
+1.  **Dropdown Selection (`render: "list"`)**: Displays a dropdown menu for selecting from a set of predefined values, which is useful for fields like software versions or configurations.
 
 
     Example with schema validation :
 
-    <pre class="language-json"><code class="lang-json"><strong>{
-    </strong><strong>  "type": "string",
-    </strong>  "enum": ["version1", "version2", "version3"],
+    ```json 
+    {
+      "type": "string",
+      "enum": ["version1", "version2", "version3"],
+      "default": "version1",
       "description": "Choose a software version"
     }
-    </code></pre>
+    ```
 
-    \
     Example without schema validation (usefull if your chart are reused in other context and you want people to specify other value):
 
-    <pre class="language-json"><code class="lang-json"><strong>{
-    </strong><strong>  "type": "string",
-    </strong>  "render": "list",
-      "listEnum": ["version1", "version2", "version3"], //this is onyxia specification
+    ```json
+    {
+      "type": "string",
+      "render": "list",
+      "listEnum": ["version1", "version2", "version3"], // this is onyxia specification
+      "default": "version1",
       "description": "Choose a software version"
     }
-    </code></pre>
+    ```
+
 2.  **Password Field (`render: "password"`)**: Provides a masked input field to secure sensitive data, such as passwords or API keys.
 
     ```json
