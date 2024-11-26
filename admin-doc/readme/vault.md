@@ -1,18 +1,3 @@
----
-description: Let's use hashicorp Vault for storing the user secrets.
-layout:
-  title:
-    visible: true
-  description:
-    visible: true
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: false
----
-
 # 🔓 Vault
 
 {% hint style="info" %}
@@ -21,13 +6,12 @@ Vault is also used by Onyxia as the persistance layer for all saved configuratio
 
 Onyxia-web use vault as a storage for two kinds of secrets:\
 1\. secrets or information generate by Onyxia to store differents values (S3 sources configuration)\
-2\. user secrets\
-
+2\. user secrets\\
 
 **Onyxia use the KV version 2 secret engine.**\
 **Vault must be configured with JWT or OIDC authentification methods.**
 
-As Vault needs to be initialized with a master key, it can't be directly configured with all parameters such as oidc or access policies and roles. So first step we create a vault with dev mode (do not use this in production and do your initialization with any of the recommanded configuration:     , gcp, another vault).
+As Vault needs to be initialized with a master key, it can't be directly configured with all parameters such as oidc or access policies and roles. So first step we create a vault with dev mode (do not use this in production and do your initialization with any of the recommanded configuration: , gcp, another vault).
 
 ```bash
 helm repo add hashicorp https://helm.releases.hashicorp.com
@@ -54,7 +38,7 @@ EOF
 helm install vault hashicorp/vault -f vault-values.yaml
 ```
 
-### Setting up JWT authentification for Vault
+#### Setting up JWT authentification for Vault
 
 From Keycloak, create a client called "vault" (realm "datalab" as usually in this documentation)
 
@@ -78,7 +62,7 @@ We will now configure Vault to enable `JWT` support, set policies for users perm
 
 You will need the Vault `CLI`. You can either download it [here](https://www.vaultproject.io/downloads) and configure `VAULT_ADDR=https://vault.lab.my-domain.net` and `VAULT_TOKEN=root` or exec into the vault pod `kubectl exec -it vault-0 -n vault -- /bin/sh` which will have vault `CLI` installed and pre-configured.
 
-First, we start by creating a `JWT` endpoint in Vault, and writing information about Keycloak to the configuration. We use the same realm as usually in this documentation.&#x20;
+First, we start by creating a `JWT` endpoint in Vault, and writing information about Keycloak to the configuration. We use the same realm as usually in this documentation.
 
 ```
 vault auth enable jwt
@@ -92,7 +76,7 @@ vault write auth/jwt/config \
 
 Onyxia uses only one single role for every user in Vault. This is in this tutorial `onyxia-user`\`. **To provide an authorization mechanism a policy is used that will depend on claims inside the JWT token.**
 
-First you need to get the identifier (mount accessor) for the JWT authentification just created. You can use :&#x20;
+First you need to get the identifier (mount accessor) for the JWT authentification just created. You can use :
 
 ```
 vault auth list -format=json | jq -r '.["jwt/"].accessor'
@@ -100,7 +84,7 @@ vault auth list -format=json | jq -r '.["jwt/"].accessor'
 
 which should provide you something like `auth_jwt_xyz`. You will need it to **write a proper policy** by replacing the `auth_jwt_xyz` content with your own value.
 
-### Setting up a policy
+#### Setting up a policy
 
 Create locally a file named `onyxia-policy.hcl`.
 
@@ -271,13 +255,13 @@ path "onyxia-kv/metadata/projet-{{identity.entity.aliases.auth_jwt_xyz.metadata.
 
 Once the policy file is created, we can proceed with creating the policy.
 
-```
+```bash
 vault policy write onyxia-policy onyxia-policy.hcl
 ```
 
 We can go on with the role `onyxia-user`.
 
-```
+```bash
 vault write auth/jwt/role/onyxia-user \
     role_type="jwt" \
     bound_audiences="vault" \

@@ -7,7 +7,7 @@
   * [🐙 GitOps](admin-doc/readme/gitops.md)
   * [🔑 User authentication](admin-doc/readme/user-authentication.md)
   * [🗃️ Data (S3)](admin-doc/readme/data-s3.md)
-  * [🔓 Vault](admin-doc/readme/...rest.md)
+  * [🔓 Vault](admin-doc/readme/vault.md)
 * [🎨 Theme and branding](admin-doc/theme.md)
 * [🔬 Catalog of services](admin-doc/catalog-of-services/README.md)
   * [🏠 Use your own repositories](admin-doc/catalog-of-services/use-your-own-repositories.md)
