@@ -6,12 +6,12 @@ Vault is also used by Onyxia as the persistance layer for all saved configuratio
 
 Onyxia-web use vault as a storage for two kinds of secrets:\
 1\. secrets or information generate by Onyxia to store differents values (S3 sources configuration)\
-2\. user secrets\\
+2\. user secrets\
 
 **Onyxia use the KV version 2 secret engine.**\
 **Vault must be configured with JWT or OIDC authentification methods.**
 
-As Vault needs to be initialized with a master key, it can't be directly configured with all parameters such as oidc or access policies and roles. So first step we create a vault with dev mode (do not use this in production and do your initialization with any of the recommanded configuration: , gcp, another vault).
+As Vault needs to be initialized with a master key, it can't be directly configured with all parameters such as oidc or access policies and roles. So first step we create a vault with dev mode (do not use this in production and do your initialization with any of the recommanded configuration: Shamir, gcp, another vault).
 
 ```bash
 helm repo add hashicorp https://helm.releases.hashicorp.com
@@ -279,7 +279,7 @@ vault secrets enable -path=onyxia-kv kv-v2
 Then, you need to allow the URL https://datalab.my-domain.net in Vault's CORS settings.
 
 ```
-vault write sys/config/cors allowed_origins="https://onyxia.lias-lab.fr" enabled=true
+vault write sys/config/cors allowed_origins="https://datalab.my-domain.net" enabled=true
 ```
 
 You can finally modify your onyxia config file (in the helm values) :tada:
